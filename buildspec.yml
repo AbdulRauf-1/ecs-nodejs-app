@@ -4,21 +4,24 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 810048207918.dkr.ecr.us-east-1.amazonaws.com/ecs-nodejs-app:latest
-      - REPOSITORY_URI=810048207918.dkr.ecr.us-east-1.amazonaws.com/ecs-nodejs-app:latest
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 810048207918.dkr.ecr.us-east-1.amazonaws.com
+      - REPOSITORY_URI=810048207918.dkr.ecr.us-east-1.amazonaws.com/ecs-nodejs-app
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo REPOSITORY_URI=$REPOSITORY_URI
+      - echo IMAGE_TAG=$IMAGE_TAG
   build:
     commands:
       - echo Building the Docker image...
       - docker build -t ecs-nodejs-app:$IMAGE_TAG .
-      - docker tag ecs-nodejs-app:$IMAGE_TAG $REPOSITORY_URI:latest
       - docker tag ecs-nodejs-app:$IMAGE_TAG $REPOSITORY_URI:$IMAGE_TAG
+      - docker tag ecs-nodejs-app:$IMAGE_TAG $REPOSITORY_URI:latest
   post_build:
     commands:
       - echo Pushing the Docker image...
-      - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
       - echo Writing image definitions...
       - printf '[{"name":"nodejs-app","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
 artifacts:
-  files: imagedefinitions.json
+  files:
+    - imagedefinitions.json
