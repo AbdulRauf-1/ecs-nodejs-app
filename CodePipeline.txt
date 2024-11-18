@@ -1,0 +1,59 @@
+Make a node project in the local system. 
+Create app.js file which will include information related to route, aws service etc.
+Make a docker file(node image)
+Now, test the application locally.
+Build the Docker Image:
+docker build -t ecs-nodejs-app .
+
+Run the Docker Container:
+docker run -p 3000:3000 ecs-nodejs-app
+
+Test the Application:
+Open http://localhost:3000/ in your browser or use curl:
+curl http://localhost:3000/
+
+Make a repository in ECR.
+Use the AWS CLI to authenticate Docker to your ECR registry.
+Retrieve the Login Command(v3):
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
+Replace 123456789012.dkr.ecr.us-east-1.amazonaws.com with your actual repository URI.
+Execute the Command:
+This logs Docker into your ECR registry.
+
+Tag the Docker Image:
+docker tag ecs-nodejs-app:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/ecs-nodejs-app:latest
+
+Push the Docker Image to ECR:
+docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/ecs-nodejs-app:latest
+Make a cluster in ECS. Define task definition for the cluster. Also provide it with the IAM Role, which can be used to access the AWS services. AmazonECSTaskExecutionRolePolicy must be included in the role. 
+Now, use the task definition to create a service in the ECS cluster, which can run the task definition to see if the task can connect ECS with ECR. Use the Public IP of the task with the port, if IP shows the same thing as it was running locally or not.
+
+Update the node project
+Now add the seeding data(seed.js), to check if data is stored in the AWS database. (node seed.js).
+Using the AWS CLI to scan the table:
+aws dynamodb scan --table-name Users --region us-east-1
+http://YOUR_ECS_PUBLIC_IP:PORT/api (http://4.5.6.7:3000/users)
+
+Insert Items Using AWS CLI
+Create a JSON File with User Data
+Create a file named user.json with the following content:
+
+{
+  "UserID": { "S": "6" },
+  "Name": { "S": "Grace Hopper" },
+  "Email": { "S": "grace.hopper@example.com" }
+}
+
+Use the put-item Command to Insert the User
+aws dynamodb put-item --table-name Users --item file://user.json --region us-east-1
+
+CI/CD Implementation:
+Github is the source. For other CI/CD, use AWS services like code build, pipeline.
+
+Push the code to github repo. Make a buildspec.yml file for the build purpose.
+Create a new role for codepipeline and code build. So, they can be accessed.
+
+Create a project in codebuild, which will be linked to github. Also, give it the service role created earlier. Provide it with the yml file in your github repo. Test the build created earlier
+
+Create a pipeline in AWS codepipeline. Define github as source, use the build project for the build purpose. In the deployment stage, choose ecs cluster and the service created in it. 
+

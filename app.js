@@ -25,6 +25,10 @@ app.get('/', (req, res) => {
   res.send('Welcome to the ECS Node.js DynamoDB API!');
 });
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'Healthy' });
+});
+
 // Create a New User
 app.post('/users', async (req, res) => {
   const { UserID, Name, Email } = req.body;
