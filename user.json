@@ -1,0 +1,6 @@
+{
+    "UserID": { "S": "6" },
+    "Name": { "S": "Grace Hopper" },
+    "Email": { "S": "grace.hopper@example.com" }
+  }
+  
